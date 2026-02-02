@@ -96,9 +96,10 @@ const TrainerView: React.FC = () => {
 
     const saveSession = () => {
         const duration = 60 - timeLeft; // Should be 60 if ran fully, or partial if stopped early
-        const actualDuration = duration < 5 ? 60 : duration; // Default to 60 if glitch
+        const actualDuration = duration < 1 ? 1 : duration; // Avoid div by zero just in case
 
-        const calculatedBpm = Math.round((reviewCount / actualDuration) * 60);
+        // User requested NO extrapolation. Count IS the score/BPM.
+        const calculatedBpm = reviewCount;
 
         HistoryService.addSession({
             date: new Date().toISOString().split('T')[0],
