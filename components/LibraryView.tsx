@@ -56,8 +56,8 @@ const LibraryView: React.FC = () => {
                             key={f}
                             onClick={() => setFilter(f.toLowerCase() as any)}
                             className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${filter === f.toLowerCase()
-                                    ? 'bg-primary text-white'
-                                    : 'bg-card text-gray-400 hover:bg-gray-800'
+                                ? 'bg-primary text-white'
+                                : 'bg-card text-gray-400 hover:bg-gray-800'
                                 }`}
                         >
                             {f}
@@ -74,7 +74,7 @@ const LibraryView: React.FC = () => {
                                 <h3 className="font-bold text-lg">{chord.key}<span className="text-gray-400 text-sm font-normal ml-1">{chord.suffix}</span></h3>
                                 <button
                                     onClick={(e) => toggleFavorite(e, chord.id)}
-                                    className={`material-symbols-outlined transition-colors text-lg ${favorites.includes(chord.id) ? 'text-red-500' : 'text-gray-600 group-hover:text-red-500'}`}
+                                    className={`material-symbols-outlined transition-all text-lg ${favorites.includes(chord.id) ? 'text-red-500' : 'text-gray-600 hover:text-red-500 hover:scale-110'}`}
                                 >
                                     favorite
                                 </button>
