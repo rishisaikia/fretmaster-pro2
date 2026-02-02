@@ -14,17 +14,14 @@ const HistoryView: React.FC = () => {
         setData(history);
         // Set default selection if empty
         if (history.length > 0 && !selectedPair) {
-            setSelectedPair(`${history[0].chordA}-${history[0].chordB}`);
+            const [a, b] = [history[0].chordA, history[0].chordB].sort();
+            setSelectedPair(`${a}-${b}`);
         }
-    }, []);
+    }, [selectedPair]); // Added dependency to suppress linter, though logic is fine
 
     const uniquePairs = useMemo(() => {
         const pairs = new Set<string>();
         data.forEach(d => {
-            // Normalize directionless (A-B is same as B-A) check?
-            // The requirement says "A to B is same as B to A".
-            // So we should store valid keys.
-            // Let's create a consistent key: [A, B].sort().join('-')
             const [a, b] = [d.chordA, d.chordB].sort();
             pairs.add(`${a}-${b}`);
         });
@@ -38,6 +35,13 @@ const HistoryView: React.FC = () => {
             return `${a}-${b}` === selectedPair;
         });
     }, [data, selectedPair]);
+
+    const selectSessionPair = (chordA: string, chordB: string) => {
+        const [a, b] = [chordA, chordB].sort();
+        setSelectedPair(`${a}-${b}`);
+        // Scroll to top to see graph
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const downloadCSV = () => {
         const headers = ['Date', 'Chord A', 'Chord B', 'Count', 'BPM'];
@@ -77,11 +81,7 @@ const HistoryView: React.FC = () => {
     const getPairLabel = (pairKey: string) => {
         if (!pairKey) return 'Select Pair';
         const [a, b] = pairKey.split('-');
-        // We stored IDs, maybe show them directly or map to names found in data?
-        // Since we don't have access to CHORD_DB here easily without import (which is fine),
-        // we'll just show IDs which are readable (e.g. "G-C").
-        // Actually let's just replace "-" with " ⇄ "
-        return pairKey.replace('-', ' ⇄ ');
+        return `${a} ⇄ ${b}`;
     };
 
     const maxBpm = useMemo(() => {
@@ -220,7 +220,11 @@ const HistoryView: React.FC = () => {
                     {data.slice().reverse().map((session, idx) => {
                         const isMastered = RecommendationService.isPairMastered(session.chordA, session.chordB);
                         return (
-                            <div key={session.id || idx} className={`bg-card p-4 rounded-xl flex items-center justify-between border transition-colors ${isMastered ? 'border-green-500/30' : 'border-transparent hover:border-gray-700'}`}>
+                            <div
+                                key={session.id || idx}
+                                onClick={() => selectSessionPair(session.chordA, session.chordB)}
+                                className={`bg-card p-4 rounded-xl flex items-center justify-between border transition-colors cursor-pointer active:scale-[0.98] ${isMastered ? 'border-green-500/30' : 'border-transparent hover:border-gray-700'}`}
+                            >
                                 <div className="flex items-center gap-4">
                                     <div className={`size-10 rounded-lg flex items-center justify-center ${isMastered ? 'bg-green-500/10 text-green-500' : 'bg-gray-800 text-gray-400'}`}>
                                         <span className="material-symbols-outlined">{isMastered ? 'check_circle' : 'music_note'}</span>
