@@ -74,7 +74,7 @@ const LibraryView: React.FC = () => {
                                 <h3 className="font-bold text-lg">{chord.key}<span className="text-gray-400 text-sm font-normal ml-1">{chord.suffix}</span></h3>
                                 <button
                                     onClick={(e) => toggleFavorite(e, chord.id)}
-                                    className={`material-symbols-outlined transition-all text-xl p-2 rounded-full ${favorites.includes(chord.id) ? 'text-red-500 hover:scale-110 active:scale-95' : 'text-gray-400 hover:text-red-500 hover:scale-110 active:scale-95'}`}
+                                    className={`material-symbols-outlined relative z-10 transition-all text-xl p-2 rounded-full ${favorites.includes(chord.id) ? 'text-red-500 hover:scale-110 active:scale-95' : 'text-gray-400 hover:text-red-500 hover:scale-110 active:scale-95'}`}
                                 >
                                     {favorites.includes(chord.id) ? 'favorite' : 'favorite_border'}
                                 </button>
