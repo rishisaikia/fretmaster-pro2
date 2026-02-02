@@ -108,6 +108,8 @@ export class StrumDetector {
   private lastStrumTime: number = 0;
   private checkInterval: number | null = null;
 
+  private isTriggered: boolean = false;
+
   async start(callback: () => void) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -155,9 +157,17 @@ export class StrumDetector {
     // In a real app, this would be complex pitch detection.
     // For a prototype, checking for a volume spike (attack) is effective.
     const now = Date.now();
-    if (average > 15 && (now - this.lastStrumTime > 600)) { // 600ms debounce (debounce prevents double counting same strum)
+
+    // Hysteresis & Debounce
+    // Trigger Threshold: 15
+    // Reset Threshold: 10
+    // Debounce: 300ms
+    if (!this.isTriggered && average > 15 && (now - this.lastStrumTime > 300)) {
       this.lastStrumTime = now;
+      this.isTriggered = true;
       if (this.onStrum) this.onStrum();
+    } else if (average < 10) {
+      this.isTriggered = false;
     }
 
     this.checkInterval = requestAnimationFrame(() => this.listen());
