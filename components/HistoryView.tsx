@@ -33,7 +33,7 @@ const HistoryView: React.FC = () => {
         return data.filter(d => {
             const [a, b] = [d.chordA, d.chordB].sort();
             return `${a}-${b}` === selectedPair;
-        });
+        }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     }, [data, selectedPair]);
 
     const selectSessionPair = (chordA: string, chordB: string) => {
@@ -231,7 +231,10 @@ const HistoryView: React.FC = () => {
                                     </div>
                                     <div>
                                         <p className="font-bold text-sm text-white flex items-center gap-2">
-                                            {session.chordA} ⇄ {session.chordB}
+                                            {(() => {
+                                                const [a, b] = [session.chordA, session.chordB].sort();
+                                                return `${a} ⇄ ${b}`;
+                                            })()}
                                             {isMastered && <span className="text-[10px] bg-green-500/20 text-green-500 px-1.5 py-0.5 rounded font-bold uppercase">Mastered</span>}
                                         </p>
                                         <p className="text-xs text-gray-500">{session.date}</p>

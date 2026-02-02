@@ -88,78 +88,78 @@ export class MetronomeEngine {
 
     // Visual callback
     if (this.onBeatCallback) {
-        // We use a simplified visual sync here. In prod, we'd use Draw callbacks via requestAnimationFrame
-        // synchronized with audio time, but setTimeout is "good enough" for React state updates.
-        const delay = Math.max(0, (time - this.audioContext!.currentTime) * 1000);
-        setTimeout(() => {
-            this.onBeatCallback!(beatNumber);
-        }, delay);
+      // We use a simplified visual sync here. In prod, we'd use Draw callbacks via requestAnimationFrame
+      // synchronized with audio time, but setTimeout is "good enough" for React state updates.
+      const delay = Math.max(0, (time - this.audioContext!.currentTime) * 1000);
+      setTimeout(() => {
+        this.onBeatCallback!(beatNumber);
+      }, delay);
     }
   }
 }
 
 export class StrumDetector {
-    private audioContext: AudioContext | null = null;
-    private analyser: AnalyserNode | null = null;
-    private source: MediaStreamAudioSourceNode | null = null;
-    private dataArray: Uint8Array | null = null;
-    private onStrum: (() => void) | null = null;
-    private isListening: boolean = false;
-    private lastStrumTime: number = 0;
-    private checkInterval: number | null = null;
+  private audioContext: AudioContext | null = null;
+  private analyser: AnalyserNode | null = null;
+  private source: MediaStreamAudioSourceNode | null = null;
+  private dataArray: Uint8Array | null = null;
+  private onStrum: (() => void) | null = null;
+  private isListening: boolean = false;
+  private lastStrumTime: number = 0;
+  private checkInterval: number | null = null;
 
-    async start(callback: () => void) {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-            this.analyser = this.audioContext.createAnalyser();
-            this.source = this.audioContext.createMediaStreamSource(stream);
-            this.source.connect(this.analyser);
-            
-            this.analyser.fftSize = 256;
-            const bufferLength = this.analyser.frequencyBinCount;
-            this.dataArray = new Uint8Array(bufferLength);
-            
-            this.onStrum = callback;
-            this.isListening = true;
-            this.listen();
-        } catch (e) {
-            console.error("Mic access denied", e);
-            alert("Please enable microphone access to use the trainer.");
-        }
+  async start(callback: () => void) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.analyser = this.audioContext.createAnalyser();
+      this.source = this.audioContext.createMediaStreamSource(stream);
+      this.source.connect(this.analyser);
+
+      this.analyser.fftSize = 256;
+      const bufferLength = this.analyser.frequencyBinCount;
+      this.dataArray = new Uint8Array(bufferLength);
+
+      this.onStrum = callback;
+      this.isListening = true;
+      this.listen();
+    } catch (e) {
+      console.error("Mic access denied", e);
+      alert("Please enable microphone access to use the trainer.");
+    }
+  }
+
+  stop() {
+    this.isListening = false;
+    if (this.checkInterval) cancelAnimationFrame(this.checkInterval);
+    this.source?.disconnect();
+    this.analyser?.disconnect();
+    if (this.audioContext && this.audioContext.state !== 'closed') {
+      this.audioContext.close();
+    }
+  }
+
+  private listen() {
+    if (!this.isListening || !this.analyser || !this.dataArray) return;
+
+    this.analyser.getByteFrequencyData(this.dataArray);
+
+    // Calculate average volume
+    let sum = 0;
+    for (let i = 0; i < this.dataArray.length; i++) {
+      sum += this.dataArray[i];
+    }
+    const average = sum / this.dataArray.length;
+
+    // Simple threshold detection for a "strum"
+    // In a real app, this would be complex pitch detection.
+    // For a prototype, checking for a volume spike (attack) is effective.
+    const now = Date.now();
+    if (average > 15 && (now - this.lastStrumTime > 600)) { // 600ms debounce (debounce prevents double counting same strum)
+      this.lastStrumTime = now;
+      if (this.onStrum) this.onStrum();
     }
 
-    stop() {
-        this.isListening = false;
-        if (this.checkInterval) cancelAnimationFrame(this.checkInterval);
-        this.source?.disconnect();
-        this.analyser?.disconnect();
-        if (this.audioContext && this.audioContext.state !== 'closed') {
-            this.audioContext.close();
-        }
-    }
-
-    private listen() {
-        if (!this.isListening || !this.analyser || !this.dataArray) return;
-
-        this.analyser.getByteFrequencyData(this.dataArray);
-
-        // Calculate average volume
-        let sum = 0;
-        for(let i = 0; i < this.dataArray.length; i++) {
-            sum += this.dataArray[i];
-        }
-        const average = sum / this.dataArray.length;
-
-        // Simple threshold detection for a "strum"
-        // In a real app, this would be complex pitch detection.
-        // For a prototype, checking for a volume spike (attack) is effective.
-        const now = Date.now();
-        if (average > 40 && (now - this.lastStrumTime > 600)) { // 600ms debounce (debounce prevents double counting same strum)
-            this.lastStrumTime = now;
-            if (this.onStrum) this.onStrum();
-        }
-
-        this.checkInterval = requestAnimationFrame(() => this.listen());
-    }
+    this.checkInterval = requestAnimationFrame(() => this.listen());
+  }
 }

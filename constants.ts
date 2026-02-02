@@ -301,7 +301,7 @@ ALL_KEYS.forEach(key => {
 // Manual Fixes / Additions (Legacy support + Special Requests)
 // 1. F Open
 CHORD_DB.push({
-  id: 'F_open', key: 'F', suffix: '', name: 'F Major (Open)',
+  id: 'F_open', key: 'F', suffix: '', name: 'F Major',
   difficulty: 'intermediate', type: 'open',
   positions: [{ baseFret: 1, frets: [-1, -1, 3, 2, 1, 1], fingers: [0, 0, 3, 2, 1, 1] }]
 });

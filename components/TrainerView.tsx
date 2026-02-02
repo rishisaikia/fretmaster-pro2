@@ -19,9 +19,14 @@ const TrainerView: React.FC = () => {
     const [showReview, setShowReview] = useState(false);
     const [reviewCount, setReviewCount] = useState(0);
 
+    // Countdown State
+    const [isCountingDown, setIsCountingDown] = useState(false);
+    const [countdownVal, setCountdownVal] = useState(3);
+
     // Reffing
     const detectorRef = useRef<StrumDetector | null>(null);
     const timerRef = useRef<number | null>(null);
+    const wakeLockRef = useRef<any>(null);
 
     // Derived State
     const targetBpm = useMemo(() => {
@@ -59,11 +64,61 @@ const TrainerView: React.FC = () => {
         };
     }, [isActive]);
 
-    const startSession = async () => {
+    // Countdown Logic
+    useEffect(() => {
+        let interval: number;
+        if (isCountingDown) {
+            interval = window.setInterval(() => {
+                setCountdownVal(prev => {
+                    if (prev <= 1) {
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [isCountingDown]);
+
+    useEffect(() => {
+        if (isCountingDown && countdownVal === 0) {
+            setIsCountingDown(false);
+            beginTraining();
+        }
+    }, [isCountingDown, countdownVal]);
+
+    const requestWakeLock = async () => {
+        try {
+            if ('wakeLock' in navigator) {
+                wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+            }
+        } catch (err) {
+            console.error('Wake Lock error:', err);
+        }
+    };
+
+    const releaseWakeLock = async () => {
+        if (wakeLockRef.current) {
+            try {
+                await wakeLockRef.current.release();
+                wakeLockRef.current = null;
+            } catch (err) {
+                console.error('Wake Lock release error:', err);
+            }
+        }
+    };
+
+    const startSession = () => {
+        setCountdownVal(3);
+        setIsCountingDown(true);
+    };
+
+    const beginTraining = async () => {
         setCount(0);
         setTimeLeft(60);
         setIsActive(true);
         setListening(true);
+        requestWakeLock();
 
         if (!detectorRef.current) {
             detectorRef.current = new StrumDetector();
@@ -75,6 +130,7 @@ const TrainerView: React.FC = () => {
 
     const finishSession = () => {
         if (detectorRef.current) detectorRef.current.stop();
+        releaseWakeLock();
         setIsActive(false);
         setListening(false);
         // Show Modal
@@ -190,8 +246,20 @@ const TrainerView: React.FC = () => {
                 </div>
             )}
 
+            {/* Countdown Overlay */}
+            {isCountingDown && (
+                <div className="absolute inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center animate-fade-in">
+                    <div className="text-center">
+                        <span className="text-[150px] font-bold text-primary animate-ping-slow block leading-none">
+                            {countdownVal > 0 ? countdownVal : 'GO'}
+                        </span>
+                        <p className="text-xl text-white font-bold mt-4 uppercase tracking-widest">Get Ready</p>
+                    </div>
+                </div>
+            )}
+
             {/* Recommendations */}
-            {!isActive && (
+            {!isActive && !isCountingDown && (
                 <div className="mb-8">
                     <div className="flex justify-between items-center mb-3">
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Suggested For You</span>
@@ -221,7 +289,7 @@ const TrainerView: React.FC = () => {
             )}
 
             {/* Config / Target */}
-            <div className={`transition-all duration-500 ease-in-out ${isActive ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            <div className={`transition-all duration-500 ease-in-out ${isActive || isCountingDown ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
                 <div className="flex justify-between items-center mb-4">
                     <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Target Chords</span>
                     <div className="flex items-center gap-2 px-3 py-1 bg-card border border-gray-700 shadow-sm rounded-full">
@@ -285,9 +353,12 @@ const TrainerView: React.FC = () => {
             <div className="mt-auto">
                 <button
                     onClick={isActive ? finishSession : startSession}
+                    disabled={isCountingDown}
                     className={`w-full h-16 rounded-xl flex items-center justify-center gap-3 text-lg font-bold tracking-wide transition-all ${isActive
                         ? 'bg-card border border-gray-700 text-white hover:bg-gray-800'
-                        : 'bg-primary text-white shadow-lg shadow-primary/25 hover:bg-primary/90'
+                        : isCountingDown
+                            ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                            : 'bg-primary text-white shadow-lg shadow-primary/25 hover:bg-primary/90'
                         }`}
                 >
                     {isActive ? (
