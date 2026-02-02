@@ -30,9 +30,10 @@ const Fretboard: React.FC<FretboardProps> = ({ position, className = "" }) => {
           x={paddingX - 4}
           y={paddingY + 8}
           textAnchor="end"
-          fill="white"
+          fill="currentColor"
           fontSize="9"
           fontWeight="bold"
+          className="text-gray-400 font-bold"
         >
           {baseFret}fr
         </text>
