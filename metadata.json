@@ -1,0 +1,7 @@
+{
+  "name": "FretMaster Pro",
+  "description": "The ultimate toolkit for guitarists. Features a precision metronome, extensive chord library with over 100 chords, and an AI-assisted chord change trainer.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
