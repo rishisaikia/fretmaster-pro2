@@ -22,9 +22,20 @@ const Fretboard: React.FC<FretboardProps> = ({ position, className = "" }) => {
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className={`w-full h-full ${className}`}>
-      {/* Nut */}
-      {baseFret === 1 && (
+      {/* Nut or Base Fret Indicator */}
+      {baseFret === 1 ? (
         <rect x={paddingX - 1} y={paddingY - 4} width={width - 2 * paddingX + 2} height={4} fill="#e5e7eb" rx={1} />
+      ) : (
+        <text
+          x={paddingX - 4}
+          y={paddingY + 8}
+          textAnchor="end"
+          fill="white"
+          fontSize="9"
+          fontWeight="bold"
+        >
+          {baseFret}fr
+        </text>
       )}
 
       {/* Frets */}
@@ -55,7 +66,9 @@ const Fretboard: React.FC<FretboardProps> = ({ position, className = "" }) => {
 
       {/* Barres */}
       {barres?.map((fret) => {
-        const fretY = paddingY + (fret - 0.5) * fGap;
+        // Calculate relative fret position
+        const relFret = fret - (baseFret - 1);
+        const fretY = paddingY + (relFret - 0.5) * fGap;
         return (
           <rect
             key={`barre-${fret}`}
@@ -73,58 +86,63 @@ const Fretboard: React.FC<FretboardProps> = ({ position, className = "" }) => {
       {frets.map((fret, stringIdx) => {
         // Skip muted or open if strictly drawing dots, but handle markers
         if (fret === -1) {
-            // X Marker
-            return (
-                <text 
-                    key={`mute-${stringIdx}`} 
-                    x={paddingX + stringIdx * sGap} 
-                    y={paddingY - 8} 
-                    textAnchor="middle" 
-                    fill="#ef4444" 
-                    fontSize="10"
-                >×</text>
-            );
+          // X Marker
+          return (
+            <text
+              key={`mute-${stringIdx}`}
+              x={paddingX + stringIdx * sGap}
+              y={paddingY - 8}
+              textAnchor="middle"
+              fill="#ef4444"
+              fontSize="10"
+            >×</text>
+          );
         }
         if (fret === 0) {
-            // Open string circle
-            return (
-                <circle 
-                    key={`open-${stringIdx}`}
-                    cx={paddingX + stringIdx * sGap}
-                    cy={paddingY - 11}
-                    r="2.5"
-                    stroke="#9ca3af"
-                    strokeWidth="1"
-                    fill="none"
-                />
-            );
+          // Open string circle
+          return (
+            <circle
+              key={`open-${stringIdx}`}
+              cx={paddingX + stringIdx * sGap}
+              cy={paddingY - 11}
+              r="2.5"
+              stroke="#9ca3af"
+              strokeWidth="1"
+              fill="none"
+            // If baseFret > 1, open strings are technically "behind" the view, 
+            // but standard notation shows them at the top.
+            />
+          );
         }
 
-        // Check if covered by barre, if so, don't draw individual dot unless required
+        // Calculate relative fret position for dot
+        const relFret = fret - (baseFret - 1);
+
+        // Check if covered by barre
         const isBarred = barres?.includes(fret);
-        
+
         // Draw Dot
         return (
           <g key={`dot-${stringIdx}`}>
             <circle
               cx={paddingX + stringIdx * sGap}
-              cy={paddingY + (fret - 0.5) * fGap}
+              cy={paddingY + (relFret - 0.5) * fGap}
               r={6}
               fill="#308ce8"
               stroke="#1c2630"
               strokeWidth={1}
             />
             {position.fingers[stringIdx] > 0 && (
-                <text
-                    x={paddingX + stringIdx * sGap}
-                    cy={paddingY + (fret - 0.5) * fGap + 2.5}
-                    textAnchor="middle"
-                    fill="white"
-                    fontSize="7"
-                    fontWeight="bold"
-                >
-                    {position.fingers[stringIdx]}
-                </text>
+              <text
+                x={paddingX + stringIdx * sGap}
+                cy={paddingY + (relFret - 0.5) * fGap + 2.5}
+                textAnchor="middle"
+                fill="white"
+                fontSize="7"
+                fontWeight="bold"
+              >
+                {position.fingers[stringIdx]}
+              </text>
             )}
           </g>
         );

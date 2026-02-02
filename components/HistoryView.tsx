@@ -158,7 +158,7 @@ const HistoryView: React.FC = () => {
                 <h3 className="font-bold text-lg mb-4 text-txt">Practice Goals</h3>
                 <div className="flex gap-4">
                     <div className="flex-1">
-                        <label className="text-xs text-gray-400 font-bold uppercase mb-2 block">Open Chords Target</label>
+                        <label className="text-xs text-gray-400 font-bold uppercase mb-2 block">Open Chords</label>
                         <div className="flex items-center gap-2">
                             <input
                                 type="number"
@@ -176,7 +176,7 @@ const HistoryView: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex-1">
-                        <label className="text-xs text-gray-400 font-bold uppercase mb-2 block">Barre Chords Target</label>
+                        <label className="text-xs text-gray-400 font-bold uppercase mb-2 block">Barre Chords</label>
                         <div className="flex items-center gap-2">
                             <input
                                 type="number"
