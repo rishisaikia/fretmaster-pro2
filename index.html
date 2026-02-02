@@ -1,55 +1,89 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>FretMaster Pro</title>
-    <meta name="description" content="Guitar practice companion app" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Lexend', 'sans-serif'],
-            },
-            colors: {
-              primary: '#308ce8',
-              // Semantic colors that adapt to theme
-              background: 'var(--bg)',
-              card: 'var(--card)',
-              txt: 'var(--text)',
-              secondary: '#1a242f', // Legacy
-              dark: '#111921', // Legacy reference kept to avoid breaking if used explicitly
-            }
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>FretMaster Pro</title>
+  <meta name="description" content="Guitar practice companion app" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Lexend', 'sans-serif'],
+          },
+          colors: {
+            primary: '#308ce8',
+            // Semantic colors that adapt to theme
+            background: 'var(--bg)',
+            card: 'var(--card)',
+            txt: 'var(--text)',
+            secondary: '#1a242f', // Legacy
+            dark: '#111921', // Legacy reference kept to avoid breaking if used explicitly
           }
         }
       }
-    </script>
-    <style>
-      :root {
-        /* Light Mode Defaults */
-        --bg: #f1f5f9;
-        --card: #ffffff;
-        --text: #0f172a;
-      }
-      .dark {
-        /* Dark Mode Overrides */
-        --bg: #111921;
-        --card: #1c2630;
-        --text: #ffffff;
-      }
-      
-      body { background-color: var(--bg); color: var(--text); transition: background-color 0.3s, color 0.3s; }
-      /* Hide scrollbar for clean UI */
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+    }
+  </script>
+  <style>
+    :root {
+      /* Light Mode Defaults */
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --sat: env(safe-area-inset-top);
+      --sab: env(safe-area-inset-bottom);
+      --sal: env(safe-area-inset-left);
+      --sar: env(safe-area-inset-right);
+    }
+
+    .dark {
+      /* Dark Mode Overrides */
+      --bg: #111921;
+      --card: #1c2630;
+      --text: #ffffff;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      transition: background-color 0.3s, color 0.3s;
+      padding-top: var(--sat);
+      padding-bottom: var(--sab);
+      padding-left: var(--sal);
+      padding-right: var(--sar);
+      /* Mobile Touch Improvements */
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      overscroll-behavior-y: none;
+    }
+
+    /* Allow text selection in inputs */
+    input,
+    textarea {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    /* Hide scrollbar for clean UI */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -60,10 +94,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body>
-    <div id="root"></div>
+
+<body>
+  <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
